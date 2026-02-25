@@ -105,13 +105,3 @@ def edit(id):
     conn.close()
 
     return render_template("edit.html", record=record)
-
-
-import os
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return render_template("index.html")
