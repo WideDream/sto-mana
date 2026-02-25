@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Record</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;padding:20px;}
+.card{background:#1e293b;padding:20px;border-radius:10px;}
+input{padding:8px;margin:5px;border-radius:5px;border:none;}
+button{padding:8px 15px;background:#22c55e;border:none;color:white;border-radius:5px;}
+</style>
+</head>
+<body>
+
+<h2>Edit Record</h2>
+
+<div class="card">
+<form method="POST">
+<input name="name" value="{{ record.full_name }}" required>
+<input name="product" value="{{ record.product }}" required>
+<input name="quantity" type="number" step="any" value="{{ record.quantity }}" required>
+<input name="unit_price" type="number" step="any" value="{{ record.unit_price }}" required>
+<input name="paid" type="number" step="any" value="{{ record.paid }}" required>
+<button>Update</button>
+</form>
+</div>
+
+</body>
+</html>

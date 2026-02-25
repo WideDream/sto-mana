@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Store Dashboard</title>
+<style>
+body {font-family: Arial; background:#0f172a; color:white; padding:20px;}
+h1{text-align:center;}
+.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:15px;}
+input{padding:8px;margin:5px;border-radius:5px;border:none;}
+button{padding:8px 15px;border:none;border-radius:5px;cursor:pointer;}
+.add{background:#22c55e;color:white;}
+.search{background:#3b82f6;color:white;}
+.edit{background:#facc15;}
+.delete{background:#ef4444;color:white;}
+table{width:100%;background:#1e293b;border-collapse:collapse;}
+th,td{padding:10px;border-bottom:1px solid #334155;text-align:center;}
+th{background:#2563eb;}
+.summary{display:flex;gap:20px;}
+.summary div{background:#1e293b;padding:15px;border-radius:10px;flex:1;text-align:center;}
+</style>
+</head>
+<body>
+
+<h1>Store Loan Manager</h1>
+
+<div class="summary">
+<div>Total Sales<br><strong>{{ total_sales }}</strong></div>
+<div>Total Loans<br><strong>{{ total_loans }}</strong></div>
+</div>
+
+<div class="card">
+<form method="POST">
+<input name="name" placeholder="Full Name" required>
+<input name="product" placeholder="Product" required>
+<input name="quantity" type="number" step="any" placeholder="Qty" required>
+<input name="unit_price" type="number" step="any" placeholder="Unit Price" required>
+<input name="paid" type="number" step="any" placeholder="Paid" required>
+<button class="add">Add</button>
+</form>
+</div>
+
+<form method="GET">
+<input name="search" placeholder="Search by name">
+<button class="search">Search</button>
+</form>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Product</th>
+<th>Total</th>
+<th>Paid</th>
+<th>Loan</th>
+<th>Action</th>
+</tr>
+
+{% for r in records %}
+<tr>
+<td>{{ r.full_name }}</td>
+<td>{{ r.product }}</td>
+<td>{{ r.total }}</td>
+<td>{{ r.paid }}</td>
+<td>{{ r.loan }}</td>
+<td>
+<a href="/edit/{{ r.id }}"><button class="edit">Edit</button></a>
+<a href="/delete/{{ r.id }}"><button class="delete">Delete</button></a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>
