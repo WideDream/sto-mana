@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
+import datetime
 
 app = Flask(__name__)
 
@@ -20,8 +21,17 @@ def init_db():
         total REAL,
         paid REAL,
         loan REAL
+        ,date TEXT
     )
     """)
+    conn.commit()
+    # If an older DB exists without the `date` column, add it.
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(records)").fetchall()]
+    if 'date' not in cols:
+        try:
+            conn.execute("ALTER TABLE records ADD COLUMN date TEXT")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -38,14 +48,15 @@ def index():
         quantity = float(request.form["quantity"])
         unit_price = float(request.form["unit_price"])
         paid = float(request.form["paid"])
+        date = request.form.get("date") or datetime.date.today().isoformat()
 
         total = quantity * unit_price
         loan = total - paid
 
         conn.execute("""
-        INSERT INTO records (full_name, product, quantity, unit_price, total, paid, loan)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (name, product, quantity, unit_price, total, paid, loan))
+        INSERT INTO records (full_name, product, quantity, unit_price, total, paid, loan, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (name, product, quantity, unit_price, total, paid, loan, date))
         conn.commit()
         return redirect("/")
 
@@ -63,10 +74,13 @@ def index():
 
     conn.close()
 
+    now_date = datetime.date.today().isoformat()
+
     return render_template("index.html",
                            records=records,
                            total_sales=total_sales,
-                           total_loans=total_loans)
+                           total_loans=total_loans,
+                           now_date=now_date)
 
 
 @app.route("/delete/<int:id>")
@@ -88,15 +102,16 @@ def edit(id):
         quantity = float(request.form["quantity"])
         unit_price = float(request.form["unit_price"])
         paid = float(request.form["paid"])
+        date = request.form.get("date") or datetime.date.today().isoformat()
 
         total = quantity * unit_price
         loan = total - paid
 
         conn.execute("""
         UPDATE records
-        SET full_name=?, product=?, quantity=?, unit_price=?, total=?, paid=?, loan=?
+        SET full_name=?, product=?, quantity=?, unit_price=?, total=?, paid=?, loan=?, date=?
         WHERE id=?
-        """, (name, product, quantity, unit_price, total, paid, loan, id))
+        """, (name, product, quantity, unit_price, total, paid, loan, date, id))
         conn.commit()
         conn.close()
         return redirect("/")
@@ -104,4 +119,5 @@ def edit(id):
     record = conn.execute("SELECT * FROM records WHERE id=?", (id,)).fetchone()
     conn.close()
 
-    return render_template("edit.html", record=record)
+    now_date = datetime.date.today().isoformat()
+    return render_template("edit.html", record=record, now_date=now_date)

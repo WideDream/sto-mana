@@ -18,8 +18,10 @@ button{padding:8px 15px;background:#22c55e;border:none;color:white;border-radius
 <input name="name" value="{{ record.full_name }}" required>
 <input name="product" value="{{ record.product }}" required>
 <input name="quantity" type="number" step="any" value="{{ record.quantity }}" required>
+<span>kg</span>
 <input name="unit_price" type="number" step="any" value="{{ record.unit_price }}" required>
 <input name="paid" type="number" step="any" value="{{ record.paid }}" required>
+<input name="date" type="date" value="{{ record.date or now_date }}">
 <button>Update</button>
 </form>
 </div>

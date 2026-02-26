@@ -32,9 +32,10 @@ th{background:#2563eb;}
 <form method="POST">
 <input name="name" placeholder="Full Name" required>
 <input name="product" placeholder="Product" required>
-<input name="quantity" type="number" step="any" placeholder="Qty" required>
+<input name="quantity" type="number" step="any" placeholder="Qty (kg)" required>
 <input name="unit_price" type="number" step="any" placeholder="Unit Price" required>
 <input name="paid" type="number" step="any" placeholder="Paid" required>
+<input name="date" type="date" value="{{ now_date }}">
 <button class="add">Add</button>
 </form>
 </div>
@@ -48,6 +49,8 @@ th{background:#2563eb;}
 <tr>
 <th>Name</th>
 <th>Product</th>
+<th>Quantity (kg)</th>
+<th>Date</th>
 <th>Total</th>
 <th>Paid</th>
 <th>Loan</th>
@@ -58,6 +61,8 @@ th{background:#2563eb;}
 <tr>
 <td>{{ r.full_name }}</td>
 <td>{{ r.product }}</td>
+<td>{{ r.quantity }} kg</td>
+<td>{{ r.date or '' }}</td>
 <td>{{ r.total }}</td>
 <td>{{ r.paid }}</td>
 <td>{{ r.loan }}</td>
