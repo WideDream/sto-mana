@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sales Analytics & Reports</title>
+<style>
+* {margin: 0; padding: 0; box-sizing: border-box;}
+body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background:#0f172a; color:white; padding:20px; min-height: 100vh;}
+.container {max-width: 1400px; margin: 0 auto;}
+h1 {margin-bottom: 20px; font-size: 2em;}
+.nav-bar {text-align: right; margin-bottom: 20px;}
+.nav-bar a {color:#3b82f6; text-decoration:none; font-weight: 500; margin-left: 20px;}
+.nav-bar a:hover {text-decoration: underline;}
+.grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;}
+.kpi-card {background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+.kpi-card h3 {color: #94a3b8; font-size: 0.95em; margin-bottom: 10px;}
+.kpi-card .value {font-size: 2em; color: #60a5fa; font-weight: 700;}
+.card {background:#1e293b; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+table {width:100%; border-collapse:collapse; margin-top:15px;}
+th, td {padding:12px; border-bottom:1px solid #334155; text-align:left;}
+th {background:#2563eb; font-weight: 600;}
+tr:hover {background:#334155;}
+.warning {color: #fca5a5; font-weight: 600;}
+.success {color: #86efac;}
+@media (max-width: 768px) {
+  .grid {grid-template-columns: 1fr;}
+  table {font-size: 0.9em;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>📊 Sales Analytics & Reports</h1>
+<div class="nav-bar">
+  <a href="/">← Dashboard</a>
+  <a href="/logout">Logout</a>
+</div>
+
+<div class="grid">
+  <div class="kpi-card">
+    <h3>Total Overdue Loans</h3>
+    <div class="value warning">{{ overdue_records|length }} items</div>
+  </div>
+  <div class="kpi-card">
+    <h3>Top Customer</h3>
+    {% if top_customers %}
+      <div style="font-size: 1.2em; color: #cbd5e1;">{{ top_customers[0].full_name }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+<h2>⚠️ Overdue Loans</h2>
+{% if overdue_records %}
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Loan Amount (RWF)</th>
+        <th>Due Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in overdue_records %}
+        <tr>
+          <td><a href="/customer/{{ r.customer_id }}" style="color: #60a5fa;">{{ r.full_name }}</a></td>
+          <td class="warning">{{ r.loan|rwf }}</td>
+          <td class="warning">{{ r.due_date or '–' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p style="color: #94a3b8;">No overdue loans 🎉</p>
+{% endif %}
+</div>
+
+<div class="card">
+<h2>💰 Top Customers (All Time)</h2>
+{% if top_customers %}
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Total Spent (RWF)</th>
+        <th>Transactions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in top_customers %}
+        <tr>
+          <td><a href="/customer/{{ c.id }}" style="color: #60a5fa;">{{ c.full_name }}</a></td>
+          <td>{{ c.total_spent|rwf }}</td>
+          <td>{{ c.transactions }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</div>
+
+<div class="card">
+<h2>📈 Monthly Sales (Last 12 Months)</h2>
+{% if monthly_sales %}
+  <table>
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Sales (RWF)</th>
+        <th>Transactions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in monthly_sales %}
+        <tr>
+          <td>{{ m.month }}</td>
+          <td>{{ m.sales|rwf }}</td>
+          <td>{{ m.transactions }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</div>
+
+<div class="card">
+<h2>📋 Payment Status Summary</h2>
+{% if payment_summary %}
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Count</th>
+        <th>Outstanding Loan (RWF)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payment_summary %}
+        <tr style="{% if p.payment_status == 'pending' %}color: #fca5a5;{% else %}color: #86efac;{% endif %}">
+          <td>{{ p.payment_status|upper }}</td>
+          <td>{{ p.count }}</td>
+          <td>{{ p.total_loan|rwf }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+</div>
+
+</div>
+
+</body>
+</html>

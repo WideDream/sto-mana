@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ customer.full_name }} - Profile</title>
+<style>
+* {margin: 0; padding: 0; box-sizing: border-box;}
+body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background:#0f172a; color:white; padding:20px; min-height: 100vh;}
+.container {max-width: 900px; margin: 0 auto;}
+h2 {margin-bottom: 20px;}
+.nav-bar {text-align: right; margin-bottom: 20px;}
+.nav-bar a {color:#f97316; text-decoration:none; font-weight: 500;}
+.nav-bar a:hover {text-decoration: underline;}
+.card {background:#1e293b; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+input, textarea {width: 100%; padding:10px; margin:8px 0; border-radius:6px; border:none; font-family: inherit; background: #0f172a; color: white;}
+input::placeholder, textarea::placeholder {color: #64748b;}
+button {padding:10px 20px; background:#22c55e; border:none; color:white; border-radius:6px; font-weight: 500; cursor: pointer; transition: all 0.2s;}
+button:hover {background:#16a34a;}
+table {width:100%; background:#1e293b; border-collapse:collapse; margin-top:15px; border-radius: 8px; overflow: hidden;}
+th, td {padding:12px; border-bottom:1px solid #334155; text-align:center;}
+th {background:#2563eb; font-weight: 600;}
+a {color: #60a5fa; text-decoration: none;}
+a:hover {text-decoration: underline;}
+.edit-btn {background:#facc15; color:#000;}
+.edit-btn:hover {background:#eab308;}
+.del-btn {background:#ef4444; color:white;}
+.del-btn:hover {background:#dc2626;}
+label {display: block; margin-top: 12px; margin-bottom: 4px; font-weight: 500;}
+.flash-msg {color: #fde68a; background: #7c2d12; padding: 10px; border-radius: 6px; margin-bottom: 15px;}
+@media (max-width: 768px) {
+  table {font-size: 0.9em;}
+  th, td {padding: 8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Customer Profile: {{ customer.full_name }}</h2>
+
+<div class="nav-bar"><a href="/">← Back to Dashboard</a> &nbsp; <a href="/logout">Logout</a></div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for m in messages %}
+      <div class="flash-msg">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+<h3 style="margin-bottom: 15px;">Profile Information</h3>
+<form method="POST" action="/customer/{{ customer.id }}">
+<input type="hidden" name="action" value="update_profile">
+<label>Full Name</label>
+<input value="{{ customer.full_name }}" disabled required>
+
+<label>Phone</label>
+<input name="phone" value="{{ customer.phone or '' }}" placeholder="Phone number">
+
+<label>Address</label>
+<input name="address" value="{{ customer.address or '' }}" placeholder="Address">
+
+<label>Notes / Extra Info</label>
+<textarea name="note" placeholder="Add customer details, history, special notes..." rows="4">{{ customer.note or '' }}</textarea>
+
+<button type="submit">Save Profile</button>
+</form>
+</div>
+
+<h3 style="margin-bottom: 15px;">Outstanding Loans Summary</h3>
+<div class="card">
+{% set total_customer_loan = records|sum(attribute='loan') %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+  <div>
+    <p style="color: #cbd5e1; font-size: 0.9em; margin-bottom: 5px;">Total Outstanding</p>
+    <p style="font-size: 1.5em; margin: 0;"><span style="color: {% if total_customer_loan > 0 %}#fca5a5{% else %}#86efac{% endif %};">{{ total_customer_loan|rwf }}</span></p>
+  </div>
+  <div>
+    <p style="color: #cbd5e1; font-size: 0.9em; margin-bottom: 5px;">Total Transactions</p>
+    <p style="font-size: 1.5em; margin: 0; color: #60a5fa;">{{ records|length }}</p>
+  </div>
+</div>
+<p style="margin-top: 15px; color: #cbd5e1; font-size: 0.85em;">Loan amount is calculated from unpaid items across all transactions below.</p>
+</div>
+
+<h3 style="margin-bottom: 15px;">Add Past Loan</h3>
+<div class="card">
+<form method="POST">
+<input type="hidden" name="action" value="add_loan">
+
+<label>Product</label>
+<input name="product" placeholder="Product name (e.g., Rice, Sugar)" required style="width: 100%;">
+
+<label>Quantity (kg)</label>
+<input name="quantity" type="number" step="0.01" placeholder="Quantity" required style="width: 48%; margin-right: 4%;">
+
+<label>Unit Price (RWF)</label>
+<input name="unit_price" type="number" step="1" placeholder="Price per unit" required style="width: 48%;">
+
+<label>Paid Amount (RWF)</label>
+<input name="paid" type="number" step="1" placeholder="Amount already paid" required style="width: 48%; margin-right: 4%;">
+
+<label>Transaction Date</label>
+<input name="date" type="date" value="{{ now_date }}" required style="width: 48%;">
+
+<label>Due Date</label>
+<input name="due_date" type="date" value="{{ due_date_default }}" required style="width: 48%; margin-right: 4%;">
+
+<label>Payment Status</label>
+<select name="payment_status" style="width: 48%; padding:12px; margin:10px 0; border-radius:6px; border:none; font-family: inherit; background: #0f172a; color: white;">
+  <option value="pending">Pending</option>
+  <option value="paid">Paid</option>
+  <option value="partial">Partial</option>
+</select>
+
+<button type="submit" style="width: 100%; padding:12px; background:#22c55e; border:none; color:white; border-radius:6px; font-weight: 500; cursor: pointer; margin-top: 20px;">Add Past Loan</button>
+</form>
+</div>
+
+<h3 style="margin-bottom: 15px;">Transaction History</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Qty (kg)</th>
+<th>Date</th>
+<th>Total (RWF)</th>
+<th>Paid (RWF)</th>
+<th>Loan (RWF)</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for r in records %}
+<tr>
+<td>{{ r.product }}</td>
+<td>{{ "%.2f"|format(r.quantity) }}</td>
+<td>{{ r.date or '–' }}</td>
+<td>{{ r.total|rwf }}</td>
+<td>{{ r.paid|rwf }}</td>
+<td style="color: {% if r.loan > 0 %}#fca5a5{% else %}#86efac{% endif %};">{{ r.loan|rwf }}</td>
+<td style="color: {% if r.payment_status == 'pending' %}#fca5a5{% elif r.payment_status == 'paid' %}#86efac{% else %}#facc15{% endif %};">{{ r.payment_status|upper }}</td>
+<td>
+<a href="/edit/{{ r.id }}"><button class="edit-btn" style="margin: 0 3px;">Edit</button></a>
+<a href="/delete/{{ r.id }}" onclick="return confirm('Delete this record?');"><button class="del-btn" style="margin: 0 3px;">Delete</button></a>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% if not records %}
+<p style="text-align: center; margin-top: 20px; color: #94a3b8;">No transactions found for this customer.</p>
+{% endif %}
+
+</div>
+
+</body>
+</html>

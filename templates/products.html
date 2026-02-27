@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Products & Inventory</title>
+<style>
+* {margin: 0; padding: 0; box-sizing: border-box;}
+body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background:#0f172a; color:white; padding:20px; min-height: 100vh;}
+.container {max-width: 1000px; margin: 0 auto;}
+h1 {margin-bottom: 20px; font-size: 2em;}
+.nav-bar {text-align: right; margin-bottom: 20px;}
+.nav-bar a {color:#3b82f6; text-decoration:none; font-weight: 500; margin-left: 20px;}
+.nav-bar a:hover {text-decoration: underline;}
+.card {background:#1e293b; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+input {width: 100%; padding:10px; margin:8px 0; border-radius:6px; border:none; font-family: inherit; background: #0f172a; color: white;}
+input::placeholder {color: #64748b;}
+button {padding:10px 15px; background:#22c55e; border:none; color:white; border-radius:6px; font-weight: 500; cursor: pointer; transition: all 0.2s;}
+button:hover {background:#16a34a;}
+table {width:100%; border-collapse:collapse; margin-top:15px;}
+th, td {padding:12px; border-bottom:1px solid #334155; text-align:left;}
+th {background:#2563eb; font-weight: 600;}
+tr:hover {background:#334155;}
+.del-btn {background:#ef4444; color:white; padding: 6px 12px;}
+.del-btn:hover {background:#dc2626;}
+.low-stock {color: #fca5a5; font-weight: 600;}
+.flash-msg {color: #86efac; background: #1f3a1f; padding: 10px; border-radius: 6px; margin-bottom: 15px;}
+.error-msg {color: #fca5a5; background: #7f1d1d; padding: 10px; border-radius: 6px; margin-bottom: 15px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>📦 Products & Inventory</h1>
+<div class="nav-bar">
+  <a href="/">← Dashboard</a>
+  <a href="/logout">Logout</a>
+</div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for m in messages %}
+      {% if 'successfully' in m.lower() or 'already' not in m.lower() %}
+        <div class="flash-msg">{{ m }}</div>
+      {% else %}
+        <div class="error-msg">{{ m }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+<h2>Add New Product</h2>
+<form method="POST">
+  <input name="name" placeholder="Product name (e.g., Rice, Sugar)" required>
+  <input name="unit" placeholder="Unit (e.g., kg, litre, bag)" required>
+  <input name="price" type="number" step="1" placeholder="Default Price (RWF)" required>
+  <input name="stock" type="number" step="0.01" placeholder="Current Stock" required>
+  <button type="submit">Add Product</button>
+</form>
+</div>
+
+<div class="card">
+<h2>Product List</h2>
+{% if products %}
+  <table>
+    <thead>
+      <tr>
+        <th>Product Name</th>
+        <th>Unit</th>
+        <th>Price (RWF)</th>
+        <th>Stock</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.unit }}</td>
+          <td>{{ p.price|rwf }}</td>
+          <td {% if p.stock < 10 %}class="low-stock"{% endif %}>{{ "%.2f"|format(p.stock) }}</td>
+          <td>
+            <a href="/product/{{ p.id }}/delete"><button class="del-btn" onclick="return confirm('Delete this product?');">Delete</button></a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p style="color: #94a3b8;">No products yet. Add your first product above.</p>
+{% endif %}
+</div>
+
+</div>
+
+</body>
+</html>
